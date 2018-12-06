@@ -180,7 +180,7 @@ class SCSSCacher {
 	 */
 	private function isCached(string $fileNameCSS, string $app) {
 		$key = $this->config->getSystemValue('version') . '/' . $app . '/' . $fileNameCSS;
-		if (!$this->config->getSystemValue('debug') && $cacheValue = $this->isCachedCache->get($key)) {
+		if ($cacheValue = $this->isCachedCache->get($key)) {
 			if ($cacheValue > $this->timeFactory->getTime()) {
 				return true;
 			}

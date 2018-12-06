@@ -48,6 +48,8 @@ class ImageManager {
 	private $cacheFactory;
 	/** @var ILogger */
 	private $logger;
+	/** @var ISimpleFolder|null */
+	private $imageFolder;
 
 	/**
 	 * ImageManager constructor.
@@ -93,6 +95,13 @@ class ImageManager {
 		return $this->urlGenerator->getAbsoluteURL($this->getImageUrl($key, $useSvg));
 	}
 
+	private function getImageFolder(): ISimpleFolder {
+		if (!$this->imageFolder) {
+			$this->imageFolder = $this->appData->getFolder('images');
+		}
+		return $this->imageFolder;
+	}
+
 	/**
 	 * @param string $key
 	 * @param bool $useSvg
@@ -103,7 +112,7 @@ class ImageManager {
 	public function getImage(string $key, bool $useSvg = true): ISimpleFile {
 		$pngFile = null;
 		$logo = $this->config->getAppValue('theming', $key . 'Mime', false);
-		$folder = $this->appData->getFolder('images');
+		$folder = $this->getImageFolder();
 		if ($logo === false || !$folder->fileExists($key)) {
 			throw new NotFoundException();
 		}
@@ -194,13 +203,13 @@ class ImageManager {
 	public function delete(string $key) {
 		/* ignore exceptions, since we don't want to fail hard if something goes wrong during cleanup */
 		try {
-			$file = $this->appData->getFolder('images')->getFile($key);
+			$file = $this->getImageFolder()->getFile($key);
 			$file->delete();
 		} catch (NotFoundException $e) {
 		} catch (NotPermittedException $e) {
 		}
 		try {
-			$file = $this->appData->getFolder('images')->getFile($key . '.png');
+			$file = $this->getImageFolder()->getFile($key . '.png');
 			$file->delete();
 		} catch (NotFoundException $e) {
 		} catch (NotPermittedException $e) {
